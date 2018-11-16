@@ -95,7 +95,7 @@ def __copy_log(builder, source_group, destination_group, nx_component_class=None
          (source_group + '/value', destination_group + '/value')]))
 
 
-def __copy_and_convert_logs(builder):
+def __copy_and_convert_logs(builder, nx_entry_name):
     __copy_log(builder, 'raw_data_1/selog/Guide_Pressure/value_log',
                nx_entry_name + '/instrument/guide_1/pressure', 'NXguide')
     __copy_log(builder, 'raw_data_1/framelog/proton_charge',
@@ -104,20 +104,20 @@ def __copy_and_convert_logs(builder):
                nx_entry_name + '/instrument/source/beam_current')
     __copy_log(builder, 'raw_data_1/selog/Det_Temp_FLB/value_log',
                nx_entry_name + '/instrument/thermocouple_1/value_log', 'NXsensor')
-    builder.add_dataset(nx_entry_name + '/instrument/thermocouple_1', 'measurement', 'temperature')
-    builder.add_dataset(nx_entry_name + '/instrument/thermocouple_1', 'name', 'front-detector,left,bottom')
+    builder.add_dataset('instrument/thermocouple_1', 'measurement', 'temperature')
+    builder.add_dataset('instrument/thermocouple_1', 'name', 'front-detector,left,bottom')
     __copy_log(builder, 'raw_data_1/selog/Det_Temp_FRB/value_log',
                nx_entry_name + '/instrument/thermocouple_2/value_log', 'NXsensor')
-    builder.add_dataset(nx_entry_name + '/instrument/thermocouple_2', 'measurement', 'temperature')
-    builder.add_dataset(nx_entry_name + '/instrument/thermocouple_2', 'name', 'front-detector,right,bottom')
+    builder.add_dataset('instrument/thermocouple_2', 'measurement', 'temperature')
+    builder.add_dataset('instrument/thermocouple_2', 'name', 'front-detector,right,bottom')
     __copy_log(builder, 'raw_data_1/selog/Det_Temp_FLT/value_log',
                nx_entry_name + '/instrument/thermocouple_3/value_log', 'NXsensor')
-    builder.add_dataset(nx_entry_name + '/instrument/thermocouple_3', 'measurement', 'temperature')
-    builder.add_dataset(nx_entry_name + '/instrument/thermocouple_3', 'name', 'front-detector,left,top')
+    builder.add_dataset('instrument/thermocouple_3', 'measurement', 'temperature')
+    builder.add_dataset('instrument/thermocouple_3', 'name', 'front-detector,left,top')
     __copy_log(builder, 'raw_data_1/selog/Det_Temp_FRT/value_log',
                nx_entry_name + '/instrument/thermocouple_4/value_log', 'NXsensor')
-    builder.add_dataset(nx_entry_name + '/instrument/thermocouple_4', 'measurement', 'temperature')
-    builder.add_dataset(nx_entry_name + '/instrument/thermocouple_4', 'name', 'front-detector,right,top')
+    builder.add_dataset('instrument/thermocouple_4', 'measurement', 'temperature')
+    builder.add_dataset('instrument/thermocouple_4', 'name', 'front-detector,right,top')
 
 
 if __name__ == '__main__':
@@ -146,8 +146,7 @@ if __name__ == '__main__':
         #                     'raw_data_1/detector_1_events/event_time_offset', 10)
 
         add_example_nxlog(builder, '/' + nx_entry_name + '/sample/', 10)
-        __copy_and_convert_logs(builder)
-
+        __copy_and_convert_logs(builder, nx_entry_name)
 
     with h5py.File(input_filename, 'r') as input_file:
         with h5py.File(output_filename, 'r+') as output_file:
@@ -155,5 +154,5 @@ if __name__ == '__main__':
             __convert_spectrum_numbers_to_detector_ids(event_id)
             output_file[nx_entry_name + '/instrument/detector_1/event_data/event_id'] = event_id
 
-    #with DetectorPlotter(output_filename, nx_entry_name) as plotter:
-    #    plotter.plot_pixel_positions()
+    with DetectorPlotter(output_filename, nx_entry_name) as plotter:
+        plotter.plot_pixel_positions()
