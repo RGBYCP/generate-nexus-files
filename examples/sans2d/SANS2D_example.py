@@ -81,13 +81,15 @@ def __convert_spectrum_numbers_to_detector_ids(ids):
 
 
 def __copy_log(builder, source_group, destination_group, nx_component_class=None):
+    split_destination = destination_group.split('/')
+    log_name = split_destination[-1]
     if nx_component_class is not None:
-        split_destination = destination_group.split('/')
         component_name = split_destination[-2]
-        log_name = split_destination[-1]
         parent_path_from_entry = '/'.join(split_destination[1:-2])
         component_group = builder.add_nx_group(parent_path_from_entry, component_name, nx_component_class)
         builder.add_nx_group(component_group, log_name, 'NXlog')
+    else:
+        builder.add_nx_group('/'.join(split_destination[1:-1]), log_name, 'NXlog')
     builder.copy_items(OrderedDict(
         [(source_group + '/time', destination_group + '/time'),
          (source_group + '/value', destination_group + '/value')]))
@@ -122,6 +124,8 @@ if __name__ == '__main__':
 
         __copy_log(builder, 'raw_data_1/selog/Guide_Pressure/value_log',
                    nx_entry_name + '/instrument/guide_1/pressure', 'NXguide')
+        __copy_log(builder, 'raw_data_1/framelog/proton_charge',
+                   nx_entry_name + '/instrument/source/proton_charge')
 
     with h5py.File(input_filename, 'r') as input_file:
         with h5py.File(output_filename, 'r+') as output_file:
