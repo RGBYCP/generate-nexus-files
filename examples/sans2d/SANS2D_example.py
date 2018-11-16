@@ -39,14 +39,14 @@ def __copy_existing_data():
          ('raw_data_1/end_time', nx_entry_name + '/end_time'),
          ('raw_data_1/run_cycle', nx_entry_name + '/run_cycle'),
          ('raw_data_1/title', nx_entry_name + '/title'),
-         ('raw_data_1/monitor_1/data', nx_entry_name + '/instrument/monitor1/data'),
-         ('raw_data_1/monitor_1/time_of_flight', nx_entry_name + '/instrument/monitor1/time_of_flight'),
-         ('raw_data_1/monitor_2/data', nx_entry_name + '/instrument/monitor2/data'),
-         ('raw_data_1/monitor_2/time_of_flight', nx_entry_name + '/instrument/monitor2/time_of_flight'),
-         ('raw_data_1/monitor_3/data', nx_entry_name + '/instrument/monitor3/data'),
-         ('raw_data_1/monitor_3/time_of_flight', nx_entry_name + '/instrument/monitor3/time_of_flight'),
-         ('raw_data_1/monitor_4/data', nx_entry_name + '/instrument/monitor4/data'),
-         ('raw_data_1/monitor_4/time_of_flight', nx_entry_name + '/instrument/monitor4/time_of_flight'),
+         ('raw_data_1/monitor_1/data', nx_entry_name + '/instrument/monitor_1/data'),
+         ('raw_data_1/monitor_1/time_of_flight', nx_entry_name + '/instrument/monitor_1/time_of_flight'),
+         ('raw_data_1/monitor_2/data', nx_entry_name + '/instrument/monitor_2/data'),
+         ('raw_data_1/monitor_2/time_of_flight', nx_entry_name + '/instrument/monitor_2/time_of_flight'),
+         ('raw_data_1/monitor_3/data', nx_entry_name + '/instrument/monitor_3/data'),
+         ('raw_data_1/monitor_3/time_of_flight', nx_entry_name + '/instrument/monitor_3/time_of_flight'),
+         ('raw_data_1/monitor_4/data', nx_entry_name + '/instrument/monitor_4/data'),
+         ('raw_data_1/monitor_4/time_of_flight', nx_entry_name + '/instrument/monitor_4/time_of_flight'),
          ('raw_data_1/detector_1_events/', event_group_path),
          #('raw_data_1/detector_1_events/event_id', event_group_path + 'event_id'),
          ('raw_data_1/detector_1_events/event_index', event_group_path + 'event_index'),
@@ -70,7 +70,7 @@ def __get_spectrum_number_to_detector_id_map(map_filename):
 
 def __convert_spectrum_numbers_to_detector_ids(ids):
     """
-    ids are input as spectrum numbers and output as detector IDs
+    ids are input as spectrum numbers and output as detector IDs (done in place)
 
     :param ids: numpy array of spectrum numbers
     :return: numpy array of detector IDs
@@ -80,8 +80,21 @@ def __convert_spectrum_numbers_to_detector_ids(ids):
         id[...] = det_spec_map[int(id)]
 
 
+def __copy_log(builder, source_group, destination_group, nx_component_class=None):
+    if nx_component_class is not None:
+        split_destination = destination_group.split('/')
+        component_name = split_destination[-2]
+        log_name = split_destination[-1]
+        parent_path_from_entry = '/'.join(split_destination[1:-2])
+        component_group = builder.add_nx_group(parent_path_from_entry, component_name, nx_component_class)
+        builder.add_nx_group(component_group, log_name, 'NXlog')
+    builder.copy_items(OrderedDict(
+        [(source_group + '/time', destination_group + '/time'),
+         (source_group + '/value', destination_group + '/value')]))
+
+
 if __name__ == '__main__':
-    output_filename = 'SANS2D_ESS_example_1.nxs'
+    output_filename = 'SANS2D_ESS_example_2.nxs'
     input_filename = 'SANS2D_ISIS_original.nxs'  # None
     nx_entry_name = 'entry'
     # compress_type=32001 for BLOSC, or don't specify compress_type and opts to get non-compressed datasets
@@ -107,11 +120,14 @@ if __name__ == '__main__':
 
         add_example_nxlog(builder, '/' + nx_entry_name + '/sample/', 10)
 
+        __copy_log(builder, 'raw_data_1/selog/Guide_Pressure/value_log',
+                   nx_entry_name + '/instrument/guide_1/pressure', 'NXguide')
+
     with h5py.File(input_filename, 'r') as input_file:
         with h5py.File(output_filename, 'r+') as output_file:
             event_id = input_file['raw_data_1/detector_1_events/event_id'][...]
             __convert_spectrum_numbers_to_detector_ids(event_id)
             output_file[nx_entry_name + '/instrument/detector_1/event_data/event_id'] = event_id
 
-    with DetectorPlotter(output_filename, nx_entry_name) as plotter:
-        plotter.plot_pixel_positions()
+    #with DetectorPlotter(output_filename, nx_entry_name) as plotter:
+    #    plotter.plot_pixel_positions()
