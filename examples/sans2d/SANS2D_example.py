@@ -154,7 +154,7 @@ if __name__ == '__main__':
             __convert_spectrum_numbers_to_detector_ids(event_id)
             output_file[nx_entry_name + '/instrument/detector_1/event_data/event_id'] = event_id
             # Create link in NXentry to the NXevent_data
-            output_file[nx_entry_name + 'event_data'] = output_file[nx_entry_name + '/instrument/detector_1/event_data']
+            output_file[nx_entry_name + '/event_data'] = output_file[nx_entry_name + '/instrument/detector_1/event_data']
 
     with DetectorPlotter(output_filename, nx_entry_name) as plotter:
         plotter.plot_pixel_positions()
