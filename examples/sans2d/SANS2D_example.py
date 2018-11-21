@@ -121,7 +121,7 @@ def __copy_and_convert_logs(builder, nx_entry_name):
 
 
 if __name__ == '__main__':
-    output_filename = 'SANS2D_ESS_example_2.nxs'
+    output_filename = 'SANS2D_ESS_example_3.nxs'
     input_filename = 'SANS2D_ISIS_original.nxs'  # None
     nx_entry_name = 'entry'
     # compress_type=32001 for BLOSC, or don't specify compress_type and opts to get non-compressed datasets
@@ -153,6 +153,8 @@ if __name__ == '__main__':
             event_id = input_file['raw_data_1/detector_1_events/event_id'][...]
             __convert_spectrum_numbers_to_detector_ids(event_id)
             output_file[nx_entry_name + '/instrument/detector_1/event_data/event_id'] = event_id
+            # Create link in NXentry to the NXevent_data
+            output_file[nx_entry_name + 'event_data'] = output_file[nx_entry_name + '/instrument/detector_1/event_data']
 
     with DetectorPlotter(output_filename, nx_entry_name) as plotter:
         plotter.plot_pixel_positions()
