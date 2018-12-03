@@ -39,14 +39,14 @@ def __copy_existing_data():
          ('raw_data_1/end_time', nx_entry_name + '/end_time'),
          ('raw_data_1/run_cycle', nx_entry_name + '/run_cycle'),
          ('raw_data_1/title', nx_entry_name + '/title'),
-         ('raw_data_1/monitor_1/data', nx_entry_name + '/instrument/monitor_1/data'),
-         ('raw_data_1/monitor_1/time_of_flight', nx_entry_name + '/instrument/monitor_1/time_of_flight'),
-         ('raw_data_1/monitor_2/data', nx_entry_name + '/instrument/monitor_2/data'),
-         ('raw_data_1/monitor_2/time_of_flight', nx_entry_name + '/instrument/monitor_2/time_of_flight'),
-         ('raw_data_1/monitor_3/data', nx_entry_name + '/instrument/monitor_3/data'),
-         ('raw_data_1/monitor_3/time_of_flight', nx_entry_name + '/instrument/monitor_3/time_of_flight'),
-         ('raw_data_1/monitor_4/data', nx_entry_name + '/instrument/monitor_4/data'),
-         ('raw_data_1/monitor_4/time_of_flight', nx_entry_name + '/instrument/monitor_4/time_of_flight'),
+         ('raw_data_1/monitor_1/data', nx_entry_name + '/instrument/monitor1/data'),
+         ('raw_data_1/monitor_1/time_of_flight', nx_entry_name + '/instrument/monitor1/time_of_flight'),
+         ('raw_data_1/monitor_2/data', nx_entry_name + '/instrument/monitor2/data'),
+         ('raw_data_1/monitor_2/time_of_flight', nx_entry_name + '/instrument/monitor2/time_of_flight'),
+         ('raw_data_1/monitor_3/data', nx_entry_name + '/instrument/monitor3/data'),
+         ('raw_data_1/monitor_3/time_of_flight', nx_entry_name + '/instrument/monitor3/time_of_flight'),
+         ('raw_data_1/monitor_4/data', nx_entry_name + '/instrument/monitor4/data'),
+         ('raw_data_1/monitor_4/time_of_flight', nx_entry_name + '/instrument/monitor4/time_of_flight'),
          ('raw_data_1/detector_1_events/', event_group_path),
          #('raw_data_1/detector_1_events/event_id', event_group_path + 'event_id'),
          ('raw_data_1/detector_1_events/event_index', event_group_path + 'event_index'),
@@ -121,7 +121,7 @@ def __copy_and_convert_logs(builder, nx_entry_name):
 
 
 if __name__ == '__main__':
-    output_filename = 'SANS2D_ESS_example_3.nxs'
+    output_filename = 'SANS2D_ESS_example_4.nxs'
     input_filename = 'SANS2D_ISIS_original.nxs'  # None
     nx_entry_name = 'entry'
     # compress_type=32001 for BLOSC, or don't specify compress_type and opts to get non-compressed datasets
