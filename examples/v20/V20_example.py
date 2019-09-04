@@ -329,9 +329,10 @@ def __create_file_writer_command(filepath):
 
     # Monitors
     monitor_topic = 'monitor'
-    __add_data_stream(streams, monitor_topic, 'Monitor_Adc0_Ch1',
-                      '/entry/monitor_1/events', 'ev42')
+    # ch2 is monitor 1 which is upstream of ch1, monitor 2
     __add_data_stream(streams, monitor_topic, 'Monitor_Adc0_Ch2',
+                      '/entry/monitor_1/events', 'ev42')
+    __add_data_stream(streams, monitor_topic, 'Monitor_Adc0_Ch1',
                       '/entry/monitor_2/events', 'ev42')
 
     # Choppers
