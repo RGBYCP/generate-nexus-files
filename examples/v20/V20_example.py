@@ -170,6 +170,7 @@ def record_z_position(builder, parent_group, distance_from_end_of_guide: float):
     position = builder.add_transformation(transforms, 'translation', distance_from_end_of_guide, 'm', [0., 0., 1.],
                                           name='position')
     builder.add_dataset(parent_group, 'depends_on', position.name)
+    return transforms
 
 
 def __add_choppers(builder):
@@ -247,7 +248,7 @@ def __add_monitors(builder):
     distance_from_guide = 0.18
     monitor_group_1 = builder.add_nx_group(builder.get_root(), 'monitor_1', 'NXmonitor')
     monitor_group_1.create_group('events')
-    builder.add_dataset(monitor_group_1, 'detector_number', 262144)
+    builder.add_dataset(monitor_group_1, 'detector_number', 262146)
     record_z_position(builder, monitor_group_1, distance_from_guide)
     builder.add_dataset(monitor_group_1, 'name', 'Helium-3 monitor 1')
 
@@ -269,35 +270,53 @@ def __add_readout_system(builder, parent_group):
 
 
 def __add_motion_devices(builder):
-    def _add_motion(builder, group_names: List[str], start_number: int = 0, nx_class: str = 'NXpositioner',
-                    pv_root: str = None, value_name: str = "value", distance_from_guide: float = 0.0):
-        for group_number, group_name in enumerate(group_names):
-            try:
-                group = builder.add_nx_group(builder.get_root()['instrument'], group_name, nx_class)
+    def _add_motion(builder, group_name: str, group_number: int = 0, nx_class: str = 'NXpositioner',
+                    pv_root: str = None, value_name: str = "value", distance_from_guide: float = 0.0, include_transform=True):
+        try:
+            group = builder.add_nx_group(builder.get_root()['instrument'], group_name, nx_class)
+            if include_transform:
                 record_z_position(builder, group, distance_from_guide)
-            except ValueError:
-                # If the group already exists that's fine
-                group = builder.get_root()['instrument'][group_name]
-            group.create_group(f'{value_name}_target')
-            group.create_group(f'{value_name}')
-            group.create_group(f'{value_name}_status')
-            group.create_group(f'{value_name}_velocity')
-            if pv_root is not None:
-                builder.add_dataset(group, 'controller_record', pv_root.format(group_number + start_number))
+        except ValueError:
+            # If the group already exists that's fine
+            group = builder.get_root()['instrument'][group_name]
+        group.create_group(f'{value_name}_target')
+        group.create_group(f'{value_name}')
+        group.create_group(f'{value_name}_status')
+        group.create_group(f'{value_name}_velocity')
+        if pv_root is not None:
+            builder.add_dataset(group, 'controller_record', pv_root.format(group_number))
+        return group
 
-    _add_motion(builder, ['linear_stage', 'tilting_angle_1', 'tilting_angle_2'], 1, pv_root='TUD-SMI:MC-MCU-01:m{}.VAL')
-    _add_motion(builder, ['Omega_1', 'Omega_2', 'Lin1'], 10, pv_root='HZB-V20:MC-MCU-01:m{}.VAL')
-    _add_motion(builder, ['Slit3'], nx_class='NXslit', value_name='x_gap', distance_from_guide=3.275)
-    _add_motion(builder, ['Slit3'], nx_class='NXslit', value_name='y_gap')
-    _add_motion(builder, ['Slit3'], nx_class='NXslit', value_name='x_center')
-    _add_motion(builder, ['Slit3'], nx_class='NXslit', value_name='y_center')
-    builder.get_root()['instrument']['Slit3'].create_group('x_gap_from_nicos_cache')
-    builder.get_root()['instrument']['Slit3'].create_group('y_gap_from_nicos_cache')
-    builder.get_root()['instrument']['Slit3'].create_group('x_center_from_nicos_cache')
-    builder.get_root()['instrument']['Slit3'].create_group('y_center_from_nicos_cache')
+    _add_motion(builder, 'linear_stage', 1, pv_root='TUD-SMI:MC-MCU-01:m{}.VAL')
+    _add_motion(builder, 'tilting_angle_1', 2, pv_root='TUD-SMI:MC-MCU-01:m{}.VAL')
+    _add_motion(builder, 'tilting_angle_2', 3, pv_root='TUD-SMI:MC-MCU-01:m{}.VAL')
+    _add_motion(builder, 'omega_1', 10, pv_root='HZB-V20:MC-MCU-01:m{}.VAL', distance_from_guide=3.6)
+    _add_motion(builder, 'omega_2', 11, pv_root='HZB-V20:MC-MCU-01:m{}.VAL', distance_from_guide=3.6)
+    lin1_group = _add_motion(builder, 'lin1', 12, pv_root='HZB-V20:MC-MCU-01:m{}.VAL', distance_from_guide=3.6, include_transform=False)
+    lin1_transforms = builder.add_nx_group(lin1_group, 'transformations', 'NXtransformations')
+    lin1_z_pos = builder.add_transformation(lin1_transforms, 'translation', 3.6, 'deg', [0, 0, 1], name='position_along_beam',)
+    lin1_orientation = builder.add_transformation(lin1_transforms, 'rotation', 44.0, 'deg', [0, 1, 0], name='orientation',
+                                                  depends_on=lin1_z_pos)
+    builder.add_dataset(lin1_group, 'depends_on', lin1_orientation.name)
+    slit3_name = 'slit3'
+    _add_motion(builder, slit3_name, nx_class='NXslit', value_name='x_gap', distance_from_guide=3.275)
+    _add_motion(builder, slit3_name, nx_class='NXslit', value_name='y_gap')
+    _add_motion(builder, slit3_name, nx_class='NXslit', value_name='x_center')
+    _add_motion(builder, slit3_name, nx_class='NXslit', value_name='y_center')
+    builder.get_root()[f'instrument/{slit3_name}'].create_group('x_gap_from_nicos_cache')
+    builder.get_root()[f'instrument/{slit3_name}'].create_group('y_gap_from_nicos_cache')
+    builder.get_root()[f'instrument/{slit3_name}'].create_group('x_center_from_nicos_cache')
+    builder.get_root()[f'instrument/{slit3_name}'].create_group('y_center_from_nicos_cache')
 
     slit2_group = builder.add_nx_group(builder.get_root()['instrument'], 'slit2', 'NXslit')
     record_z_position(builder, slit2_group, 0.08)
+
+    slit1_group = builder.add_nx_group(builder.get_root()['instrument'], 'slit1', 'NXslit')
+    x_gap_dataset = builder.add_dataset(slit1_group, 'x_gap', 0.05)
+    x_gap_dataset.attrs['units'] = 'm'
+    y_gap_dataset = builder.add_dataset(slit1_group, 'y_gap', 0.1)
+    y_gap_dataset.attrs['units'] = 'm'
+    record_z_position(builder, slit1_group, 18.45)
 
 
 def __create_file_writer_command(filepath):
@@ -415,7 +434,7 @@ def __create_file_writer_command(filepath):
             __add_data_stream(streams, nicos_topic, f"nicos/{nicos_device_name}{nicos_value_name}/value",
                               f'/entry/instrument/{slit_group_name}/{value_name}_from_nicos_cache', 'ns10')
 
-    _add_slit("Slit3", ["HZB-V20:MC-SLT-01:SltH-Center", "HZB-V20:MC-SLT-01:SltH-Gap", "HZB-V20:MC-SLT-01:SltV-Center",
+    _add_slit("slit3", ["HZB-V20:MC-SLT-01:SltH-Center", "HZB-V20:MC-SLT-01:SltH-Gap", "HZB-V20:MC-SLT-01:SltV-Center",
                         "HZB-V20:MC-SLT-01:SltV-Gap"])
 
     links = {}
@@ -492,12 +511,45 @@ if __name__ == '__main__':
         __add_motion_devices(builder)
 
         # Sample
-        sample_group = builder.add_sample()
+        sample_group = builder.add_sample('sample')
         builder.add_dataset(sample_group, 'description', '')
-        builder.add_dataset(sample_group, 'name', '')
+        builder.add_dataset(sample_group, 'name', 'SAMPLENAME')  # V-rod
         builder.add_dataset(sample_group, 'chemical_formula', '')
         builder.add_dataset(sample_group, 'mass', 0, {'units': 'g'})
-        record_z_position(builder, sample_group, 3.6)
+        sample_transforms = builder.add_nx_group(sample_group, 'transformations', 'NXtransformations')
+        offset_on_rail = builder.add_transformation(sample_transforms, 'translation', 0.37, 'm', [0, 0, 1],
+                                                    depends_on='/entry/instrument/Lin1/transformations/orientation')
+        builder.add_dataset(sample_group, 'depends_on', offset_on_rail.name)
+
+        # sample_group = builder.add_sample('sample_2')
+        # builder.add_dataset(sample_group, 'description', '')
+        # builder.add_dataset(sample_group, 'name', 'Empty V-can')
+        # builder.add_dataset(sample_group, 'chemical_formula', '')
+        # builder.add_dataset(sample_group, 'mass', 0, {'units': 'g'})
+        # sample_transforms = builder.add_nx_group(sample_group, 'transformations', 'NXtransformations')
+        # offset_on_rail = builder.add_transformation(sample_transforms, 'translation', 0.2665, 'm', [0, 0, 1],
+        #                                             depends_on='/entry/instrument/Lin1/transformations/orientation')
+        # builder.add_dataset(sample_group, 'depends_on', offset_on_rail.name)
+        #
+        # sample_group = builder.add_sample('sample_3')
+        # builder.add_dataset(sample_group, 'description', '')
+        # builder.add_dataset(sample_group, 'name', 'NaKAlF')
+        # builder.add_dataset(sample_group, 'chemical_formula', 'NaKAlF')
+        # builder.add_dataset(sample_group, 'mass', 0, {'units': 'g'})
+        # sample_transforms = builder.add_nx_group(sample_group, 'transformations', 'NXtransformations')
+        # offset_on_rail = builder.add_transformation(sample_transforms, 'translation', 0.163, 'm', [0, 0, 1],
+        #                                             depends_on='/entry/instrument/Lin1/transformations/orientation')
+        # builder.add_dataset(sample_group, 'depends_on', offset_on_rail.name)
+        #
+        # sample_group = builder.add_sample('sample_4')
+        # builder.add_dataset(sample_group, 'description', '')
+        # builder.add_dataset(sample_group, 'name', 'Ni')
+        # builder.add_dataset(sample_group, 'chemical_formula', 'Ni')
+        # builder.add_dataset(sample_group, 'mass', 0, {'units': 'g'})
+        # sample_transforms = builder.add_nx_group(sample_group, 'transformations', 'NXtransformations')
+        # offset_on_rail = builder.add_transformation(sample_transforms, 'translation', 0.0595, 'm', [0, 0, 1],
+        #                                             depends_on='/entry/instrument/Lin1/transformations/orientation')
+        # builder.add_dataset(sample_group, 'depends_on', offset_on_rail.name)
 
         # Add a source at the position of the first chopper
         source = builder.add_source('V20_14hz_chopper_source', 'source', [0.0, 0.0, -25.3])
