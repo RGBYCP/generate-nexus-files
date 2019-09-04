@@ -240,21 +240,23 @@ def __add_detector(builder):
 
 def __add_monitors(builder):
     """
-    Helium-3 monitor
+    Helium-3 monitors
     :param builder:
     :return:
     """
     distance_from_guide = 0.18
     monitor_group_1 = builder.add_nx_group(builder.get_root(), 'monitor_1', 'NXmonitor')
-    monitor_group_1.create_group('waveforms')
     monitor_group_1.create_group('events')
     builder.add_dataset(monitor_group_1, 'detector_number', 262144)
     record_z_position(builder, monitor_group_1, distance_from_guide)
-    builder.add_dataset(monitor_group_1, 'name', 'Helium-3 monitor')
+    builder.add_dataset(monitor_group_1, 'name', 'Helium-3 monitor 1')
 
     distance_from_guide = 3.35
     monitor_group_2 = builder.add_nx_group(builder.get_root(), 'monitor_2', 'NXmonitor')
+    monitor_group_2.create_group('events')
+    builder.add_dataset(monitor_group_2, 'detector_number', 262145)
     record_z_position(builder, monitor_group_2, distance_from_guide)
+    builder.add_dataset(monitor_group_2, 'name', 'Helium-3 monitor 2')
 
 
 def __add_readout_system(builder, parent_group):
@@ -329,8 +331,8 @@ def __create_file_writer_command(filepath):
     monitor_topic = 'monitor'
     __add_data_stream(streams, monitor_topic, 'Monitor_Adc0_Ch1',
                       '/entry/monitor_1/events', 'ev42')
-    __add_data_stream(streams, monitor_topic, 'Monitor_Adc0_Ch1',
-                      '/entry/monitor_1/waveforms', 'senv')
+    __add_data_stream(streams, monitor_topic, 'Monitor_Adc0_Ch2',
+                      '/entry/monitor_2/events', 'ev42')
 
     # Choppers
     chopper_topic = 'V20_choppers'
