@@ -288,11 +288,11 @@ def __add_motion_devices(builder):
             builder.add_dataset(group, 'controller_record', pv_root.format(group_number))
         return group
 
-    _add_motion(builder, 'linear_stage', 1, pv_root='TUD-SMI:MC-MCU-01:m{}.VAL')
-    _add_motion(builder, 'tilting_angle_1', 2, pv_root='TUD-SMI:MC-MCU-01:m{}.VAL')
-    _add_motion(builder, 'tilting_angle_2', 3, pv_root='TUD-SMI:MC-MCU-01:m{}.VAL')
-    _add_motion(builder, 'omega_1', 10, pv_root='HZB-V20:MC-MCU-01:m{}.VAL', distance_from_guide=3.6)
-    _add_motion(builder, 'omega_2', 11, pv_root='HZB-V20:MC-MCU-01:m{}.VAL', distance_from_guide=3.6)
+    #_add_motion(builder, 'linear_stage', 1, pv_root='TUD-SMI:MC-MCU-01:m{}.VAL')
+    #_add_motion(builder, 'tilting_angle_1', 2, pv_root='TUD-SMI:MC-MCU-01:m{}.VAL')
+    #_add_motion(builder, 'tilting_angle_2', 3, pv_root='TUD-SMI:MC-MCU-01:m{}.VAL')
+    #_add_motion(builder, 'omega_1', 10, pv_root='HZB-V20:MC-MCU-01:m{}.VAL', distance_from_guide=3.6)
+    #_add_motion(builder, 'omega_2', 11, pv_root='HZB-V20:MC-MCU-01:m{}.VAL', distance_from_guide=3.6)
     lin1_group = _add_motion(builder, 'lin1', 12, pv_root='HZB-V20:MC-MCU-01:m{}.VAL', distance_from_guide=3.6, include_transform=False)
     lin1_transforms = builder.add_nx_group(lin1_group, 'transformations', 'NXtransformations')
     lin1_z_pos = builder.add_transformation(lin1_transforms, 'translation', 3.6-shielding_to_sample, 'deg', [0, 0, 1], name='position_along_beam',)
@@ -309,8 +309,13 @@ def __add_motion_devices(builder):
     builder.get_root()[f'instrument/{slit3_name}'].create_group('x_center_from_nicos_cache')
     builder.get_root()[f'instrument/{slit3_name}'].create_group('y_center_from_nicos_cache')
 
-    slit2_group = builder.add_nx_group(builder.get_root()['instrument'], 'slit2', 'NXslit')
+    slit2_name = 'slit2'
+    slit2_group = builder.add_nx_group(builder.get_root()['instrument'], slit2_name, 'NXslit')
     record_z_position(builder, slit2_group, 0.08-shielding_to_sample)
+    builder.get_root()[f'instrument/{slit2_name}'].create_group('x_gap_from_nicos_cache')
+    builder.get_root()[f'instrument/{slit2_name}'].create_group('y_gap_from_nicos_cache')
+    builder.get_root()[f'instrument/{slit2_name}'].create_group('x_center_from_nicos_cache')
+    builder.get_root()[f'instrument/{slit2_name}'].create_group('y_center_from_nicos_cache')
 
     slit1_group = builder.add_nx_group(builder.get_root()['instrument'], 'slit1', 'NXslit')
     x_gap_dataset = builder.add_dataset(slit1_group, 'x_gap', 0.05)
@@ -401,8 +406,8 @@ def __create_file_writer_command(filepath):
                               f'/entry/instrument/{group_name}/velocity', 'f142', 'double')
 
     motion_topic = 'V20_motion'
-    _add_motion_dev("TUD-SMI:MC-MCU-01:m", ['linear_stage', 'tilting_angle_1', 'tilting_angle_2'], start_index=1)
-    _add_motion_dev("HZB-V20:MC-MCU-01:m", ['Omega_1', 'Omega_2', 'Lin1'], start_index=10)
+    #_add_motion_dev("TUD-SMI:MC-MCU-01:m", ['linear_stage', 'tilting_angle_1', 'tilting_angle_2'], start_index=1)
+    _add_motion_dev("HZB-V20:MC-MCU-01:m", ['Lin1'], start_index=12)
 
     def _add_slit(slit_group_name: str, pv_names: List[str]):
         nicos_device_name = slit_group_name.lower()
@@ -437,6 +442,14 @@ def __create_file_writer_command(filepath):
 
     _add_slit("slit3", ["HZB-V20:MC-SLT-01:SltH-Center", "HZB-V20:MC-SLT-01:SltH-Gap", "HZB-V20:MC-SLT-01:SltV-Center",
                         "HZB-V20:MC-SLT-01:SltV-Gap"])
+    __add_data_stream(streams, "V20_nicosCacheHistory", f"nicos/slit2h_gap/value",
+                      f'/entry/instrument/slit2/x_gap', 'ns10')
+    __add_data_stream(streams, "V20_nicosCacheHistory", f"nicos/slit2v_gap/value",
+                      f'/entry/instrument/slit2/y_gap', 'ns10')
+    __add_data_stream(streams, "V20_nicosCacheHistory", f"nicos/slit2h_center/value",
+                      f'/entry/instrument/slit2/x_center', 'ns10')
+    __add_data_stream(streams, "V20_nicosCacheHistory", f"nicos/slit2v_center/value",
+                      f'/entry/instrument/slit2/y_center', 'ns10')
 
     links = {}
 
@@ -504,8 +517,7 @@ if __name__ == '__main__':
     with NexusBuilder(output_filename, input_nexus_filename=input_filename, nx_entry_name=nx_entry_name,
                       idf_file=None, compress_type='gzip', compress_opts=1) as builder:
         instrument_group = builder.add_instrument('V20', 'instrument')
-        builder.add_user('Person 1', 'ESS', number=1)
-        builder.add_user('Person 2', 'STFC', number=2)
+        # builder.add_user('Person 1', 'ESS', number=1)
         __add_detector(builder)
         __add_choppers(builder)
         __add_monitors(builder)
@@ -513,10 +525,8 @@ if __name__ == '__main__':
 
         # Sample
         sample_group = builder.add_sample('sample')
-        builder.add_dataset(sample_group, 'description', '')
         builder.add_dataset(sample_group, 'name', 'SAMPLENAME')  # V-rod
-        builder.add_dataset(sample_group, 'chemical_formula', '')
-        builder.add_dataset(sample_group, 'mass', 0, {'units': 'g'})
+        builder.add_dataset(sample_group, 'chemical_formula', 'V')
         sample_transforms = builder.add_nx_group(sample_group, 'transformations', 'NXtransformations')
         offset_on_rail = builder.add_transformation(sample_transforms, 'translation', 0.37, 'm', [0, 0, 1],
                                                     depends_on='/entry/instrument/Lin1/transformations/orientation')
