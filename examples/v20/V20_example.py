@@ -6,6 +6,11 @@ from nexusjson.nexus_to_json import NexusToDictConverter, create_writer_commands
 from datetime import datetime
 from typing import List
 
+"""
+The origin of the coordinate system is the position of the beam at the end of the neutron guide,
+47m from the cold source, as described in Woracek et al 2016
+"""
+
 
 def __copy_and_transform_dataset(source_file, source_path, target_path, transformation=None, dtype=None):
     source_data = source_file[source_path][...]
@@ -85,8 +90,8 @@ def __add_chopper(builder, number):
         builder.add_dataset(chopper_group, 'slits', 1)
         builder.add_dataset(chopper_group, 'slit_height', 150., attributes={'units': 'mm'})
         builder.add_dataset(chopper_group, 'radius', 350., attributes={'units': 'mm'})
-        distance_from_sample = -27.4
-        record_chopper_position(builder, chopper_group, distance_from_sample)
+        distance_from_end_of_guide = -25.3
+        record_z_position(builder, chopper_group, distance_from_end_of_guide)
     elif number is 2:
         builder.add_dataset(chopper_group, 'name', 'Airbus, Source Chopper, ESS Pulse, Disc 2')
         builder.add_dataset(chopper_group, 'slit_edges', [0., 50.], attributes={'units': 'deg'})
@@ -94,8 +99,8 @@ def __add_chopper(builder, number):
         builder.add_dataset(chopper_group, 'slits', 1)
         builder.add_dataset(chopper_group, 'slit_height', 150., attributes={'units': 'mm'})
         builder.add_dataset(chopper_group, 'radius', 350., attributes={'units': 'mm'})
-        distance_from_sample = -27.4
-        record_chopper_position(builder, chopper_group, distance_from_sample)
+        distance_from_end_of_guide = -25.3
+        record_z_position(builder, chopper_group, distance_from_end_of_guide)
     elif number is 3:
         builder.add_dataset(chopper_group, 'name', 'Juelich, WFM Chopper, Disc 1')
         builder.add_dataset(chopper_group, 'slit_edges', np.array(
@@ -105,8 +110,8 @@ def __add_chopper(builder, number):
         builder.add_dataset(chopper_group, 'slit_height', 130., attributes={'units': 'mm'})
         builder.add_dataset(chopper_group, 'radius', 300., attributes={'units': 'mm'})
         builder.add_dataset(chopper_group, 'ntp_to_mrf_comparison', 0)
-        distance_from_sample = -20.55
-        record_chopper_position(builder, chopper_group, distance_from_sample)
+        distance_from_end_of_guide = -18.45
+        record_z_position(builder, chopper_group, distance_from_end_of_guide)
     elif number is 4:
         builder.add_dataset(chopper_group, 'name', 'Juelich, WFM Chopper, Disc 2')
         builder.add_dataset(chopper_group, 'slit_edges', np.array(
@@ -115,8 +120,8 @@ def __add_chopper(builder, number):
         builder.add_dataset(chopper_group, 'slits', 6)
         builder.add_dataset(chopper_group, 'slit_height', 130., attributes={'units': 'mm'})
         builder.add_dataset(chopper_group, 'radius', 300., attributes={'units': 'mm'})
-        distance_from_sample = -20.55
-        record_chopper_position(builder, chopper_group, distance_from_sample)
+        distance_from_end_of_guide = -18.45
+        record_z_position(builder, chopper_group, distance_from_end_of_guide)
     elif number is 5:
         builder.add_dataset(chopper_group, 'name', 'Juelich, Frame Overlap Chopper, Disc 1')
         builder.add_dataset(chopper_group, 'slit_height', 130., attributes={'units': 'mm'})
@@ -125,8 +130,8 @@ def __add_chopper(builder, number):
             [0., 64.35, 84.99, 125.05, 148.29, 183.41, 205.22, 236.4, 254.27, 287.04, 302.8, 335.53]) + 15.0,
                             attributes={'units': 'deg'})
         builder.add_dataset(chopper_group, 'slits', 6)
-        distance_from_sample = -18.6
-        record_chopper_position(builder, chopper_group, distance_from_sample)
+        distance_from_end_of_guide = -16.5
+        record_z_position(builder, chopper_group, distance_from_end_of_guide)
     elif number is 6:
         builder.add_dataset(chopper_group, 'name', 'Airbus, Wavelength-Band Chopper, Disc 1')
         builder.add_dataset(chopper_group, 'pair_separation', 24.2, attributes={'units': 'mm'})
@@ -134,8 +139,8 @@ def __add_chopper(builder, number):
         builder.add_dataset(chopper_group, 'slits', 1)
         builder.add_dataset(chopper_group, 'slit_height', 150., attributes={'units': 'mm'})
         builder.add_dataset(chopper_group, 'radius', 350., attributes={'units': 'mm'})
-        distance_from_sample = -17.4
-        record_chopper_position(builder, chopper_group, distance_from_sample)
+        distance_from_end_of_guide = -15.3
+        record_z_position(builder, chopper_group, distance_from_end_of_guide)
     elif number is 7:
         builder.add_dataset(chopper_group, 'name', 'Airbus, Wavelength-Band Chopper, Disc 2')
         builder.add_dataset(chopper_group, 'pair_separation', 24.2, attributes={'units': 'mm'})
@@ -143,8 +148,8 @@ def __add_chopper(builder, number):
         builder.add_dataset(chopper_group, 'slits', 1)
         builder.add_dataset(chopper_group, 'slit_height', 150., attributes={'units': 'mm'})
         builder.add_dataset(chopper_group, 'radius', 350., attributes={'units': 'mm'})
-        distance_from_sample = -11.5
-        record_chopper_position(builder, chopper_group, distance_from_sample)
+        distance_from_end_of_guide = -15.3
+        record_z_position(builder, chopper_group, distance_from_end_of_guide)
     elif number is 8:
         builder.add_dataset(chopper_group, 'name', 'Juelich, Frame Overlap Chopper, Disc 2')
         builder.add_dataset(chopper_group, 'slit_height', 130., attributes={'units': 'mm'})
@@ -153,18 +158,18 @@ def __add_chopper(builder, number):
             [0., 79.78, 116.38, 136.41, 172.47, 191.73, 221.94, 240.81, 267.69, 287.13, 311.69, 330.89]) + 15.0,
                             attributes={'units': 'deg'})
         builder.add_dataset(chopper_group, 'slits', 6)
-        distance_from_sample = -11.5
-        record_chopper_position(builder, chopper_group, distance_from_sample)
+        distance_from_end_of_guide = -9.4
+        record_z_position(builder, chopper_group, distance_from_end_of_guide)
 
     chopper_group.create_group('top_dead_center')
     builder.add_feature("B89B086951FEFDDF")
 
 
-def record_chopper_position(builder, chopper_group, distance_from_sample):
-    transforms = builder.add_nx_group(chopper_group, 'transformations', 'NXtransformations')
-    position = builder.add_transformation(transforms, 'translation', distance_from_sample, 'm', [0., 0., -1.],
+def record_z_position(builder, parent_group, distance_from_end_of_guide: float):
+    transforms = builder.add_nx_group(parent_group, 'transformations', 'NXtransformations')
+    position = builder.add_transformation(transforms, 'translation', distance_from_end_of_guide, 'm', [0., 0., 1.],
                                           name='position')
-    builder.add_dataset(chopper_group, 'depends_on', position.name)
+    builder.add_dataset(parent_group, 'depends_on', position.name)
 
 
 def __add_choppers(builder):
@@ -210,11 +215,11 @@ def __add_detector(builder):
     # builder.add_shape(detector_group, 'detector_shape', vertices, faces, detector_faces.T)
     # Add detector position
     transforms = builder.add_nx_group(detector_group, 'transformations', 'NXtransformations')
-    # orientation = builder.add_transformation(transforms, 'rotation', [90.0], 'deg', [0.0, 1.0, 0.0], name='orientation',
-    #                                          depends_on='.')
-    z_offset = builder.add_transformation(transforms, 'translation', [0.049], 'm', [0.0, 0.0, -1.0],
-                                          name='beam_direction_offset', depends_on='.')  # depends_on=orientation.name
-    x_offset = builder.add_transformation(transforms, 'translation', [3.5], 'm', [1.0, 0.0, 0.0], name='location',
+    orientation = builder.add_transformation(transforms, 'rotation', [90.0], 'deg', [0.0, 1.0, 0.0], name='orientation',
+                                             depends_on='.')
+    z_offset = builder.add_transformation(transforms, 'translation', [3.6], 'm', [0.0, 0.0, 1.0],
+                                          name='beam_direction_offset', depends_on=orientation.name)
+    x_offset = builder.add_transformation(transforms, 'translation', [0.935], 'm', [1.0, 0.0, 0.0], name='location',
                                           depends_on=z_offset.name)
     builder.add_dataset(detector_group, 'depends_on', x_offset.name)
 
@@ -239,16 +244,17 @@ def __add_monitors(builder):
     :param builder:
     :return:
     """
-    distance_from_sample = -1.8
+    distance_from_guide = 0.18
     monitor_group_1 = builder.add_nx_group(builder.get_root(), 'monitor_1', 'NXmonitor')
     monitor_group_1.create_group('waveforms')
     monitor_group_1.create_group('events')
     builder.add_dataset(monitor_group_1, 'detector_number', 262144)
-    monitor_1_transforms = builder.add_nx_group(monitor_group_1, 'transformations', 'NXtransformations')
-    monitor_1_z_offset = builder.add_transformation(monitor_1_transforms, 'translation', [distance_from_sample], 'm',
-                                                    [0.0, 0.0, 1.0])
-    builder.add_dataset(monitor_group_1, 'depends_on', monitor_1_z_offset.name)
+    record_z_position(builder, monitor_group_1, distance_from_guide)
     builder.add_dataset(monitor_group_1, 'name', 'Helium-3 monitor')
+
+    distance_from_guide = 3.35
+    monitor_group_2 = builder.add_nx_group(builder.get_root(), 'monitor_2', 'NXmonitor')
+    record_z_position(builder, monitor_group_2, distance_from_guide)
 
 
 def __add_readout_system(builder, parent_group):
@@ -262,10 +268,11 @@ def __add_readout_system(builder, parent_group):
 
 def __add_motion_devices(builder):
     def _add_motion(builder, group_names: List[str], start_number: int = 0, nx_class: str = 'NXpositioner',
-                    pv_root: str = None, value_name: str = "value"):
+                    pv_root: str = None, value_name: str = "value", distance_from_guide: float = 0.0):
         for group_number, group_name in enumerate(group_names):
             try:
                 group = builder.add_nx_group(builder.get_root()['instrument'], group_name, nx_class)
+                record_z_position(builder, group, distance_from_guide)
             except ValueError:
                 # If the group already exists that's fine
                 group = builder.get_root()['instrument'][group_name]
@@ -278,7 +285,7 @@ def __add_motion_devices(builder):
 
     _add_motion(builder, ['linear_stage', 'tilting_angle_1', 'tilting_angle_2'], 1, pv_root='TUD-SMI:MC-MCU-01:m{}.VAL')
     _add_motion(builder, ['Omega_1', 'Omega_2', 'Lin1'], 10, pv_root='HZB-V20:MC-MCU-01:m{}.VAL')
-    _add_motion(builder, ['Slit3'], nx_class='NXslit', value_name='x_gap')
+    _add_motion(builder, ['Slit3'], nx_class='NXslit', value_name='x_gap', distance_from_guide=3.275)
     _add_motion(builder, ['Slit3'], nx_class='NXslit', value_name='y_gap')
     _add_motion(builder, ['Slit3'], nx_class='NXslit', value_name='x_center')
     _add_motion(builder, ['Slit3'], nx_class='NXslit', value_name='y_center')
@@ -286,6 +293,9 @@ def __add_motion_devices(builder):
     builder.get_root()['instrument']['Slit3'].create_group('y_gap_from_nicos_cache')
     builder.get_root()['instrument']['Slit3'].create_group('x_center_from_nicos_cache')
     builder.get_root()['instrument']['Slit3'].create_group('y_center_from_nicos_cache')
+
+    slit2_group = builder.add_nx_group(builder.get_root()['instrument'], 'slit2', 'NXslit')
+    record_z_position(builder, slit2_group, 0.08)
 
 
 def __create_file_writer_command(filepath):
@@ -438,6 +448,7 @@ def __add_data_stream(streams, topic, source, path, module, type=None):
 
     if module == 'ev42':
         options['adc_pulse_debug'] = True
+        options['nexus'] = '{"indices": {"index_every_mb": 1}}'
     elif module == 'f142':
         # Add cue entries each megabyte for log data
         options['nexus'] = '{"indices": {"index_every_mb": 1}}'
@@ -483,9 +494,10 @@ if __name__ == '__main__':
         builder.add_dataset(sample_group, 'name', '')
         builder.add_dataset(sample_group, 'chemical_formula', '')
         builder.add_dataset(sample_group, 'mass', 0, {'units': 'g'})
+        record_z_position(builder, sample_group, 3.6)
 
         # Add a source at the position of the first chopper
-        source = builder.add_source('V20_14hz_chopper_source', 'source', [0.0, 0.0, -27.4])
+        source = builder.add_source('V20_14hz_chopper_source', 'source', [0.0, 0.0, -25.3])
         builder.add_dataset(source, 'probe', 'neutron')
 
         # Add start_time dataset (required by Mantid)
