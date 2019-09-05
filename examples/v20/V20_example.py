@@ -529,7 +529,7 @@ if __name__ == '__main__':
         builder.add_dataset(sample_group, 'chemical_formula', 'V')
         sample_transforms = builder.add_nx_group(sample_group, 'transformations', 'NXtransformations')
         offset_on_rail = builder.add_transformation(sample_transforms, 'translation', 0.37, 'm', [0, 0, 1],
-                                                    depends_on='/entry/instrument/Lin1/transformations/orientation')
+                                                    depends_on='/entry/instrument/lin1/transformations/orientation')
         builder.add_dataset(sample_group, 'depends_on', offset_on_rail.name)
 
         # sample_group = builder.add_sample('sample_2')
@@ -539,7 +539,7 @@ if __name__ == '__main__':
         # builder.add_dataset(sample_group, 'mass', 0, {'units': 'g'})
         # sample_transforms = builder.add_nx_group(sample_group, 'transformations', 'NXtransformations')
         # offset_on_rail = builder.add_transformation(sample_transforms, 'translation', 0.2665, 'm', [0, 0, 1],
-        #                                             depends_on='/entry/instrument/Lin1/transformations/orientation')
+        #                                             depends_on='/entry/instrument/lin1/transformations/orientation')
         # builder.add_dataset(sample_group, 'depends_on', offset_on_rail.name)
         #
         # sample_group = builder.add_sample('sample_3')
@@ -549,7 +549,7 @@ if __name__ == '__main__':
         # builder.add_dataset(sample_group, 'mass', 0, {'units': 'g'})
         # sample_transforms = builder.add_nx_group(sample_group, 'transformations', 'NXtransformations')
         # offset_on_rail = builder.add_transformation(sample_transforms, 'translation', 0.163, 'm', [0, 0, 1],
-        #                                             depends_on='/entry/instrument/Lin1/transformations/orientation')
+        #                                             depends_on='/entry/instrument/lin1/transformations/orientation')
         # builder.add_dataset(sample_group, 'depends_on', offset_on_rail.name)
         #
         # sample_group = builder.add_sample('sample_4')
@@ -559,7 +559,7 @@ if __name__ == '__main__':
         # builder.add_dataset(sample_group, 'mass', 0, {'units': 'g'})
         # sample_transforms = builder.add_nx_group(sample_group, 'transformations', 'NXtransformations')
         # offset_on_rail = builder.add_transformation(sample_transforms, 'translation', 0.0595, 'm', [0, 0, 1],
-        #                                             depends_on='/entry/instrument/Lin1/transformations/orientation')
+        #                                             depends_on='/entry/instrument/lin1/transformations/orientation')
         # builder.add_dataset(sample_group, 'depends_on', offset_on_rail.name)
 
         # Add a source at the position of the first chopper
